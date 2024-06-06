@@ -123,8 +123,6 @@ void invalidate_pipe(CFE_SBN_Client_PipeD_t *pipe)
     {
         pipe->SubscribedMsgIds[i] = CFE_SBN_CLIENT_INVALID_MSG_ID;
     }
-    
-    
 }
 
 size_t write_message(int sockfd, char *buffer, size_t size)
@@ -138,7 +136,7 @@ size_t write_message(int sockfd, char *buffer, size_t size)
     
 uint32 CFE_SBN_Client_GetPipeIdx(CFE_SB_PipeId_t PipeId)
 {
-    uint32 PipeIdx = (uint32) CFE_RESOURCEID_UNWRAP(PipeId.id);
+    uint32 PipeIdx = (uint32) CFE_RESOURCEID_UNWRAP(PipeId);
     /* Quick check because PipeId should match PipeIdx */
     if (CFE_RESOURCEID_TEST_EQUAL(PipeTbl[PipeIdx].PipeId, PipeId)
         && PipeTbl[PipeIdx].InUse == CFE_SBN_CLIENT_IN_USE)
@@ -161,19 +159,19 @@ uint32 CFE_SBN_Client_GetPipeIdx(CFE_SB_PipeId_t PipeId)
         } /* end for */
     
         /* Pipe ID not found */
-        return (uint32) CFE_RESOURCEID_UNWRAP(CFE_SBN_CLIENT_INVALID_PIPE.id);
+        return (uint32) CFE_RESOURCEID_UNWRAP(CFE_SBN_CLIENT_INVALID_PIPE);
     }/* end if */
   
 }/* end CFE_SBN_Client_GetPipeIdx */
 
 uint8 CFE_SBN_Client_GetMessageSubscribeIndex(CFE_SB_PipeId_t PipeId)
 {
-    uint32 PipeIdx = (uint32) CFE_RESOURCEID_UNWRAP(PipeId.id);
+    uint32 PipeIdx = (uint32) CFE_RESOURCEID_UNWRAP(PipeId);
     int i;
     
     for (i = 0; i < CFE_SBN_CLIENT_MAX_MSG_IDS_PER_PIPE; i++)
     {
-        if (PipeTbl[PipeIdx].SubscribedMsgIds[i] == CFE_SBN_CLIENT_INVALID_MSG_ID)
+        if (CFE_SB_MsgIdToValue(PipeTbl[PipeIdx].SubscribedMsgIds[i]) == CFE_SB_MsgIdToValue(CFE_SBN_CLIENT_INVALID_MSG_ID))
         {
             return i;
         }
@@ -185,7 +183,7 @@ uint8 CFE_SBN_Client_GetMessageSubscribeIndex(CFE_SB_PipeId_t PipeId)
 // TODO: Could match the new CFE_MSG_GetMsgId semantics...
 CFE_SB_MsgId_t CFE_SBN_Client_GetMsgId(CFE_MSG_Message_t * MsgPtr)
 {
-    CFE_SB_MsgId_t MsgId = 0;
+    CFE_SB_MsgId_t MsgId = CFE_SB_INVALID_MSG_ID;
 
     //uint32            SubSystemId;
 
