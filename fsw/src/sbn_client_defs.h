@@ -16,7 +16,7 @@
 /* Refer to sbn_cont_tbl.c to make sure port and ip_addr match
  * SBN is running here: <- Should be in the platform config */
 #define SBN_CLIENT_PORT    2234
-#define SBN_CLIENT_IP_ADDR "127.0.0.1"
+#define SBN_CLIENT_IP_ADDR "sc_1_nos3_fsw"
 
 #define CFE_SBN_CLIENT_MSG_ID_TO_PIPE_ID_MAP_SIZE   32
 #define SBN_HEARTBEAT_MSG                           0xA0
