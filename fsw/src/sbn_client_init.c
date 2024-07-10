@@ -46,7 +46,7 @@ int32 SBN_Client_Init(void)
     struct in_addr **addr_list;
     int i;
 
-    char Address[OS_MAX_API_NAME];
+    char Addr[OS_MAX_API_NAME];
 
     if ( (he = gethostbyname("sc_1_nos3_fsw") ) != NULL) 
     {
@@ -54,7 +54,7 @@ int32 SBN_Client_Init(void)
         for(i = 0; addr_list[i] != NULL; i++) 
         {
             //Return the first one;
-            strcpy(Address, inet_ntoa(*addr_list[i]) );
+            strcpy(&Addr, inet_ntoa(*addr_list[i]) );
             break;
         }
     }
@@ -62,9 +62,9 @@ int32 SBN_Client_Init(void)
         End hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
     */
     
-    log_message("SBN_Client Connecting to %s, %d\n", Address, SBN_CLIENT_PORT);
+    log_message("SBN_Client Connecting to %s, %d\n", Addr, SBN_CLIENT_PORT);
     
-    sbn_client_sockfd = connect_to_server(Address, SBN_CLIENT_PORT);
+    sbn_client_sockfd = connect_to_server(Addr, SBN_CLIENT_PORT);
     sbn_client_cpuId = 2; /* TODO: hardcoded, but should be set by cFS SBN ??*/
 
     if (sbn_client_sockfd < 0)
