@@ -16,6 +16,14 @@
 #include "sbn_client_minders.h"
 #include "sbn_client_utils.h"
 
+/* Start additional includes for hostname snippet */
+#include<sys/socket.h>
+#include<netdb.h>	//hostent
+#include<arpa/inet.h>
+
+/* End additional includes for hostname snippet */
+
+
 
 extern int sbn_client_sockfd;
 extern int sbn_client_cpuId;
@@ -29,10 +37,34 @@ int32 SBN_Client_Init(void)
     int32 status = SBN_CLIENT_NO_STATUS_SET;
     int heart_thread_status = 0;
     int receive_thread_status = 0;
+
+    /* 
+        DNS Resolution for FSW Container 
+        Start hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
+    */
+    struct hostent *he;
+    struct in_addr **addr_list;
+    int i;
+
+    char Address[OS_MAX_API_NAME];
+
+    if ( (he = gethostbyname("sc_1_nos3_fsw") ) != NULL) 
+    {
+        addr_list = (struct in_addr **) he->h_addr_list;
+        for(i = 0; addr_list[i] != NULL; i++) 
+        {
+            //Return the first one;
+            strcpy(Address, inet_ntoa(*addr_list[i]) );
+            break;
+        }
+    }
+    /* 
+        End hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
+    */
     
-    log_message("SBN_Client Connecting to %s, %d\n", SBN_CLIENT_IP_ADDR, SBN_CLIENT_PORT);
+    log_message("SBN_Client Connecting to %s, %d\n", Address, SBN_CLIENT_PORT);
     
-    sbn_client_sockfd = connect_to_server(SBN_CLIENT_IP_ADDR, SBN_CLIENT_PORT);
+    sbn_client_sockfd = connect_to_server(Address, SBN_CLIENT_PORT);
     sbn_client_cpuId = 2; /* TODO: hardcoded, but should be set by cFS SBN ??*/
 
     if (sbn_client_sockfd < 0)
