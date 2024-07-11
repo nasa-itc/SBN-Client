@@ -48,7 +48,7 @@ int32 SBN_Client_Init(void)
 
     // char Addr[OS_MAX_API_NAME];
 
-    // if ( (he = gethostbyname("sc_1_nos3_fsw") ) != NULL) 
+    // if ( (he = gethostbyname("sc_1_nos_fsw") ) != NULL) 
     // {
     //     addr_list = (struct in_addr **) he->h_addr_list;
     //     for(i = 0; addr_list[i] != NULL; i++) 
