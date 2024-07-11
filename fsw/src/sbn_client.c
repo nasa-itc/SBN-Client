@@ -51,7 +51,8 @@ void SendSubToSbn(int SubType, CFE_SB_MsgId_t MsgID,
     Pack_UInt16(&Pack, 54);
     Pack_UInt8(&Pack, SubType);
     Pack_UInt32(&Pack, 2); // cpuID
-    Pack_UInt32(&Pack, 0x42); // spacecraft ID
+    // Pack_UInt32(&Pack, 0x42); // spacecraft ID
+    Pack_UInt32(&Pack, 0x2A); // spacecraft ID
     Pack_Data(&Pack, (void *)SBN_IDENT, (size_t)SBN_IDENT_LEN);
     Pack_UInt16(&Pack, 1);
 

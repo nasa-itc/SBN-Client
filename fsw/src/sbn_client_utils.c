@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <arpa/inet.h>
+#include <stdlib.h>
 
 #include "sbn_client_utils.h"
 
@@ -213,7 +214,8 @@ int send_heartbeat(int sockfd)
     Pack_UInt8(&Pack, SBN_HEARTBEAT_MSG);
     // TODO: should not hardcode CpuID (2) and Spacecraft ID (0x42)
     Pack_UInt32(&Pack, 2);
-    Pack_UInt32(&Pack, 0x42);
+    // Pack_UInt32(&Pack, 0x42);
+    Pack_UInt32(&Pack, 0x2A);
     
     retval = write(sockfd, sbn_header, sizeof(sbn_header));
     
@@ -265,18 +267,33 @@ int connect_to_server(const char *server_ip, uint16_t server_port)
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(server_port);
 
-    address_converted = inet_pton(AF_INET, server_ip, &server_address.sin_addr);
+    // address_converted = inet_pton(AF_INET, server_ip, &server_address.sin_addr);
+    
+    // /* inet_pton can have two separate errors, a value of 1 is success. */
+    // if (address_converted == 0)
+    // {
+    //     perror("connect_to_server inet_pton 0 error");
+    //     return SERVER_INET_PTON_SRC_ERROR;
+    // }
+
+    // if (address_converted == -1)
+    // {
+    //     perror("connect_to_server inet_pton -1 error");
+    //     return SERVER_INET_PTON_INVALID_AF_ERROR;
+    // }
+
+    address_converted = gethostbyname(AF_INET, server_ip, &server_address.sin_addr);
     
     /* inet_pton can have two separate errors, a value of 1 is success. */
     if (address_converted == 0)
     {
-        perror("connect_to_server inet_pton 0 error");
+        perror("connect_to_server gehostbyname 0 error");
         return SERVER_INET_PTON_SRC_ERROR;
     }
 
     if (address_converted == -1)
     {
-        perror("connect_to_server inet_pton -1 error");
+        perror("connect_to_server gethostbyname -1 error");
         return SERVER_INET_PTON_INVALID_AF_ERROR;
     }
 
