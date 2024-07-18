@@ -38,6 +38,8 @@ int32 SBN_Client_Init(void)
     int heart_thread_status = 0;
     int receive_thread_status = 0;
 
+    log_message("SBN_Client Resolving Name %s\n", SBN_CLIENT_IP_ADDR);
+
     /* 
         DNS Resolution for FSW Container 
         Start hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
@@ -61,6 +63,8 @@ int32 SBN_Client_Init(void)
     /* 
         End hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
     */
+
+    log_message("SBN_Client Resolved %s to %s\n", SBN_CLIENT_IP_ADDR, Addr);
     
     log_message("SBN_Client Connecting to %s, %d\n", Addr, SBN_CLIENT_PORT);
     
