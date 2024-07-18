@@ -275,42 +275,42 @@ int connect_to_server(const char *server_ip, uint16_t server_port)
     server_address.sin_port = htons(server_port);
 
 
-    /* 
-        DNS Resolution for FSW Container 
-        Start hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
-    */
-    struct hostent *he;
-    struct in_addr **addr_list;
-    int i;
+    // /* 
+    //     DNS Resolution for FSW Container 
+    //     Start hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
+    // */
+    // struct hostent *he;
+    // struct in_addr **addr_list;
+    // int i;
 
-    if ( (he = gethostbyname(server_ip) ) != NULL) 
-    {
-        addr_list = (struct in_addr **) he->h_addr_list;
-        for(i = 0; addr_list[i] != NULL; i++) 
-        {
-            //Return the first one;
-            strcpy(&server_address.sin_addr, inet_ntoa(*addr_list[i]) );
-            break;
-        }
-    }
-    /* 
-        End hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
-    */
+    // if ( (he = gethostbyname(server_ip) ) != NULL) 
+    // {
+    //     addr_list = (struct in_addr **) he->h_addr_list;
+    //     for(i = 0; addr_list[i] != NULL; i++) 
+    //     {
+    //         //Return the first one;
+    //         strcpy(&server_address.sin_addr, inet_ntoa(*addr_list[i]) );
+    //         break;
+    //     }
+    // }
+    // /* 
+    //     End hostname snippet from: https://stackoverflow.com/questions/38002016/problems-with-gethostbyname-c
+    // */
 
-    // address_converted = inet_pton(AF_INET, server_ip, &server_address.sin_addr);
+    address_converted = inet_pton(AF_INET, server_ip, &server_address.sin_addr);
     
-    // /* inet_pton can have two separate errors, a value of 1 is success. */
-    // if (address_converted == 0)
-    // {
-    //     perror("connect_to_server inet_pton 0 error");
-    //     return SERVER_INET_PTON_SRC_ERROR;
-    // }
+    /* inet_pton can have two separate errors, a value of 1 is success. */
+    if (address_converted == 0)
+    {
+        perror("connect_to_server inet_pton 0 error");
+        return SERVER_INET_PTON_SRC_ERROR;
+    }
 
-    // if (address_converted == -1)
-    // {
-    //     perror("connect_to_server inet_pton -1 error");
-    //     return SERVER_INET_PTON_INVALID_AF_ERROR;
-    // }
+    if (address_converted == -1)
+    {
+        perror("connect_to_server inet_pton -1 error");
+        return SERVER_INET_PTON_INVALID_AF_ERROR;
+    }
 
     connection = connect(sockfd, (struct sockaddr *)&server_address,
                          sizeof(server_address));
