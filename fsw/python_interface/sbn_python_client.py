@@ -127,6 +127,11 @@ def sbn_load_and_init():
 def send_msg(send_msg_p):
     global sbn_client
 
+    # Adding debug print
+    send_msg = send_msg_p.contents
+    print("Message: {} {} {}".format(hex(send_msg.Hdr.StreamId), hex(send_msg.Hdr.Sequence), hex(send_msg.Hdr.Length)))
+    print_header(send_msg_p)
+
     sbn_client.__wrap_CFE_SB_TransmitMsg(send_msg_p, true)
 
 def recv_msg(recv_msg_p):
@@ -139,9 +144,10 @@ def recv_msg(recv_msg_p):
     print("SBN Client pipe: {}".format(cmd_pipe))
     if (status != 0):
         print("status of __wrap_CFE_SB_ReceiveBuffer = %X" % cfs_error_convert(status))
-    #recv_msg = recv_msg_p.contents
-    #print("Message: {} {} {}".format(hex(recv_msg.Hdr.StreamId), hex(recv_msg.Hdr.Sequence), hex(recv_msg.Hdr.Length)))
-    #print_header(recv_msg_p)
+    # debug print
+    recv_msg = recv_msg_p.contents
+    print("Message: {} {} {}".format(hex(recv_msg.Hdr.StreamId), hex(recv_msg.Hdr.Sequence), hex(recv_msg.Hdr.Length)))
+    print_header(recv_msg_p)
 
 def subscribe(msgid):
     global cmd_pipe
