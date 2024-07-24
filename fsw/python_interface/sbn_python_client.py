@@ -138,6 +138,7 @@ def recv_msg(recv_msg_p):
     global sbn_client
     global cmd_pipe
 
+    print("SBN Client recv_msg: recv_msg_p: {}".format(recv_msg_p))
     print("SBN Client recv_msg: before read pipe: {}".format(cmd_pipe))
     status = sbn_client.__wrap_CFE_SB_ReceiveBuffer(byref(recv_msg_p), cmd_pipe, CFE_SB_PEND_FOREVER)
 
@@ -152,6 +153,7 @@ def recv_msg(recv_msg_p):
 def subscribe(msgid):
     global cmd_pipe
 
+    print("SBN Client subscribe msgid: {}".format(msgid))
     print("SBN Client subscribe before_sub pipe: {}".format(cmd_pipe))
     status = sbn_client.__wrap_CFE_SB_Subscribe(msgid, cmd_pipe)
     print("SBN Client subscribe after_sub pipe: {}".format(cmd_pipe))
