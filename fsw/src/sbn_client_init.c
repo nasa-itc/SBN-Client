@@ -79,6 +79,7 @@ int32 SBN_Client_Init(void)
     }
     else
     {
+        log_message("SBN_Client Connected to %s:%d, sockfd=%d\n", Addr, SBN_CLIENT_PORT, sbn_client_sockfd);
         CFE_SBN_Client_InitPipeTbl();
 
         /* heartbeat thread establishes live connection */
@@ -91,6 +92,7 @@ int32 SBN_Client_Init(void)
         /* receive thread monitors for messages */
         if (status == SBN_CLIENT_SUCCESS)
         {    
+            log_message("SBN Client Created Heart pthread");
             receive_thread_status = pthread_create(&receive_thread_id, NULL, 
             SBN_Client_ReceiveMinder, NULL);
         
@@ -103,6 +105,10 @@ int32 SBN_Client_Init(void)
     if (status != SBN_CLIENT_SUCCESS)
     {
         log_message("SBN_Client_Init error %d\n", status);
+    }
+    else
+    {
+        log_message("SBN Client Created Recieve pthread, init success!");    
     }/* end if */ 
     
     return status;
