@@ -29,6 +29,8 @@ int32 __wrap_CFE_SB_CreatePipe(CFE_SB_PipeId_t *PipeIdPtr, uint16 Depth, const c
 {
     uint32 i;
     int32 status = CFE_SBN_CLIENT_MAX_PIPES_MET;
+
+    log_message("Enter Create Pipe. %s\n", __func__);
     
     /* TODO:AppId is static for now */
     
@@ -40,6 +42,7 @@ int32 __wrap_CFE_SB_CreatePipe(CFE_SB_PipeId_t *PipeIdPtr, uint16 Depth, const c
     /* sets user's pipe id value to 'invalid' for error cases */
     if(PipeIdPtr != NULL)
     {
+        log_message("Create Pipe, PipeID Not Null. PipeID: %d\n", *PipeIdPtr);
         *PipeIdPtr = CFE_SBN_CLIENT_INVALID_PIPE;
     }/* end if */
     
@@ -56,6 +59,7 @@ int32 __wrap_CFE_SB_CreatePipe(CFE_SB_PipeId_t *PipeIdPtr, uint16 Depth, const c
           
             if (PipeTbl[i].InUse != CFE_SBN_CLIENT_IN_USE)
             {
+                log_message("Enter Pipe Tbl If. %s\n", __func__);
                 // TODO:Initialize pipe
                 PipeTbl[i].InUse = CFE_SBN_CLIENT_IN_USE;
                 //PipeTbl[i].SysQueueId = ?
@@ -67,7 +71,9 @@ int32 __wrap_CFE_SB_CreatePipe(CFE_SB_PipeId_t *PipeIdPtr, uint16 Depth, const c
                 strncpy(&PipeTbl[i].PipeName[0], PipeName, OS_MAX_API_NAME); //TODO: Use different value for size?
                 //TODO: init Messages to empty?
 
-                PipeIdPtr = CFE_ResourceId_FromInteger(i);
+                *PipeIdPtr = CFE_ResourceId_FromInteger(i);
+
+                log_message("Pipe Info:\n PipeTbl[i].PipeID: %d\n PipeIDPtr: %d\n PipeName: %s\n", PipeTbl[i].PipeId, *PipeIdPtr, PipeName);
 
                 status = SBN_CLIENT_SUCCESS;
                 break;
