@@ -217,7 +217,7 @@ int send_heartbeat(int sockfd)
     Pack_t Pack;
     Pack_Init(&Pack, sbn_header, 0 + SBN_PACKED_HDR_SZ, 0);
     
-    Pack_UInt16(&Pack, 0);
+    Pack_UInt16(&Pack, 10);
     Pack_UInt8(&Pack, SBN_HEARTBEAT_MSG);
     // TODO: should not hardcode CpuID (2) and Spacecraft ID (0x42)
     Pack_UInt32(&Pack, 2);
