@@ -96,6 +96,12 @@ int32 recv_msg(int32 sockfd)
         Unpack_UInt32(&Pack, &SpacecraftID);
 
         //TODO: check cpuID and SpacecraftID to see if it is correct for this location?
+        printf("SBN_CLIENT: recv_msg with MsgType = %d, CpuID = 0x%04x, SCID = 0x%04x, MsgSz = %d, Msg = 0x", MsgType, CpuID, SpacecraftID, MsgSz);
+        for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+        {
+            printf("%02x",msg[i]);
+        }
+        printf("\n");
 
         switch(MsgType)
         {
