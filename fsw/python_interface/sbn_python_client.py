@@ -17,66 +17,137 @@ from ctypes import *
 CFE_SB_PEND_FOREVER = -1
 
 
-# typedef struct {
-#    uint8   StreamId[2];  /* packet identifier word (stream ID) */
-#       /*  bits  shift   ------------ description ---------------- */
-#       /* 0x07FF    0  : application ID                            */
-#       /* 0x0800   11  : secondary header: 0 = absent, 1 = present */
-#       /* 0x1000   12  : packet type:      0 = TLM, 1 = CMD        */
-#       /* 0xE000   13  : CCSDS version:    0 = ver 1, 1 = ver 2    */
-#    uint8   Sequence[2];  /* packet sequence word */
-#       /*  bits  shift   ------------ description ---------------- */
-#       /* 0x3FFF    0  : sequence count                            */
-#       /* 0xC000   14  : segmentation flags:  3 = complete packet  */
-#    uint8  Length[2];     /* packet length word */
-#       /*  bits  shift   ------------ description ---------------- */
-#       /* 0xFFFF    0  : (total packet length) - 7                 */
-# } CCSDS_PriHdr_t;
+# /**
+#  * \brief Full CCSDS header
+#  */
+# typedef struct
+# {
+#     CCSDS_PrimaryHeader_t Pri; /**< \brief CCSDS Primary Header */
+# } CCSDS_SpacePacket_t;
 
-# Version 2 of CCSDS has 4 extra bytes for the secondary header
-# typedef struct {
-#    uint8 APIDQSubsystem[2];
-#    uint8 APIDQSystemId[2];
-# } CCSDS_APIDqualifiers_t;
+# /**
+#  * \brief cFS generic base message
+#  *
+#  * This provides the definition of CFE_MSG_Message_t
+#  */
+# union CFE_MSG_Message
+# {
+#     CCSDS_SpacePacket_t CCSDS;                             /**< \brief CCSDS Header (Pri or Pri + Ext) */
+#     uint8               Byte[sizeof(CCSDS_SpacePacket_t)]; /**< \brief Byte level access */
+# };
 
-# The time format is configurable... using 2 bytes right now
-# typedef struct {
-#    uint8  Time[CCSDS_TIME_SIZE];
-# } CCSDS_TlmSecHdr_t;
+# /**
+#  * \brief cFS command header
+#  *
+#  * This provides the definition of CFE_MSG_CommandHeader_t
+#  */
+# struct CFE_MSG_CommandHeader
+# {
+#     CFE_MSG_Message_t                Msg; /**< \brief Base message */
+#     CFE_MSG_CommandSecondaryHeader_t Sec; /**< \brief Secondary header */
+# };
 
-# typedef union {
-#     CCSDS_PriHdr_t      Hdr;   /**< \brief CCSDS Primary Header #CCSDS_PriHdr_t */
-#     CCSDS_SpacePacket_t SpacePacket;
-#     uint32              Dword; /**< \brief Forces minimum of 32-bit alignment for this object */
-#     uint8               Byte[sizeof(CCSDS_PriHdr_t)];   /**< \brief Allows byte-level access */
-# }CFE_SB_Msg_t;
+# /**
+#  * \brief cFS telemetry header
+#  *
+#  * This provides the definition of CFE_MSG_TelemetryHeader_t
+#  */
+# struct CFE_MSG_TelemetryHeader
+# {
+#     CFE_MSG_Message_t                  Msg;      /**< \brief Base message */
+#     CFE_MSG_TelemetrySecondaryHeader_t Sec;      /**< \brief Secondary header */
+#     uint8                              Spare[4]; /**< \brief Pad to avoid compiler padding if payload
+#                                                              requires 64 bit alignment */
+# };
+
+# /**********************************************************************
+#  * Structure definitions for CCSDS headers.
+#  *
+#  * CCSDS headers must always be in network byte order per the standard.
+#  * MSB at the lowest address which is commonly referred to as "BIG Endian"
+#  *
+#  */
+
+# /**
+#  * \brief CCSDS packet primary header
+#  */
+# typedef struct CCSDS_PrimaryHeader
+# {
+#     uint8 StreamId[2]; /**< \brief packet identifier word (stream ID) */
+#                        /*  bits  shift   ------------ description ---------------- */
+#                        /* 0x07FF    0  : application ID                            */
+#                        /* 0x0800   11  : secondary header: 0 = absent, 1 = present */
+#                        /* 0x1000   12  : packet type:      0 = TLM, 1 = CMD        */
+#                        /* 0xE000   13  : CCSDS version:    0 = ver 1, 1 = ver 2    */
+
+#     uint8 Sequence[2]; /**< \brief packet sequence word */
+#                        /*  bits  shift   ------------ description ---------------- */
+#                        /* 0x3FFF    0  : sequence count                            */
+#                        /* 0xC000   14  : segmentation flags:  3 = complete packet  */
+
+#     uint8 Length[2]; /**< \brief packet length word */
+#                      /*  bits  shift   ------------ description ---------------- */
+#                      /* 0xFFFF    0  : (total packet length) - 7                 */
+# } CCSDS_PrimaryHeader_t;
+
+# /**
+#  * \brief cFS command secondary header
+#  */
+# typedef struct
+# {
+#     uint8 FunctionCode; /**< \brief Command Function Code */
+#                         /* bits shift ---------description-------- */
+#                         /* 0x7F  0    Command function code        */
+#                         /* 0x80  7    Reserved                     */
+
+#     uint8 Checksum; /**< \brief Command checksum  (all bits, 0xFF)      */
+# } CFE_MSG_CommandSecondaryHeader_t;
+
+# /**
+#  * \brief cFS telemetry secondary header
+#  */
+# typedef struct
+# {
+#     uint8 Time[6]; /**< \brief Time, big endian: 4 byte seconds, 2 byte subseconds */
+# } CFE_MSG_TelemetrySecondaryHeader_t;
 
 # Note: Not currently dealing with the whole union issue
-class Primary_Header_t(BigEndianStructure):
+class CCSDS_PrimaryHeader_t(BigEndianStructure):
     _pack_ = 1
     _fields_ = [("StreamId", c_uint16),
                 ("Sequence", c_uint16),
                 ("Length", c_uint16)]
 
-class Secondary_Header_t(BigEndianStructure):
+class CCSDS_SpacePacket_t(BigEndianStructure):
+    _pack_ = 1
+    _fields_ = [("Pri", CCSDS_PrimaryHeader_t)]
+
+class CFE_MSG_Message_t(BigEndianStructure):
+    _pack_ = 1
+    _fields_ = [("CCSDS", CCSDS_SpacePacket_t),
+                ("Byte", c_uint8[sizeof(CCSDS_SpacePacket_t)])]
+
+class CFE_MSG_TelemetrySecondaryHeader_t(BigEndianStructure):
     _pack_ = 1
     _fields_ = [("Seconds", c_uint32),
-                ("Subseconds", c_uint16),
-                ("Spare", c_uint32)]
+                ("Subseconds", c_uint16)]
 
-# typedef struct {
-#    uint8 FunctionCode; /* Command Function Code */
-#                        /* bits shift ---------description-------- */
-#                        /* 0x7F  0    Command function code        */
-#                        /* 0x80  7    Reserved                     */
-#
-#    uint8 Checksum;     /* Command checksum  (all bits, 0xFF)      */
-# } CCSDS_CmdSecHdr_t;
-
-class Command_Header_t(Structure):
+class CFE_MSG_CommandSecondaryHeader_t(BigEndianStructure):
     _pack_ = 1
     _fields_ = [("FunctionCode", c_uint8),
                 ("Checksum", c_uint8)]
+    
+class CFE_MSG_CommandHeader_t(BigEndianStructure):
+    _pack_ = 1
+    _fields_ = [("Msg", CFE_MSG_Message_t),
+                ("Sec", CFE_MSG_CommandSecondaryHeader_t),
+                ("Spare", c_uint32)]
+    
+class CFE_MSG_TelemetryHeader_t(BigEndianStructure):
+    _pack_ = 1
+    _fields_ = [("Msg", CFE_MSG_Message_t),
+                ("Sec", CFE_MSG_TelemetrySecondaryHeader_t),
+                ("Spare", c_uint32)]
 
 class CFE_SB_Msg_t(Structure):
     _pack_ = 1
@@ -143,6 +214,7 @@ def recv_msg(recv_msg_p):
     status = sbn_client.__wrap_CFE_SB_ReceiveBuffer(byref(recv_msg_p), cmd_pipe, CFE_SB_PEND_FOREVER)
 
     print("SBN Client recv_msg: after read pipe: {}".format(cmd_pipe))
+    print_header(recv_msg_p)
     if (status != 0):
         print("status of __wrap_CFE_SB_ReceiveBuffer = %X" % cfs_error_convert(status))
     # debug print
