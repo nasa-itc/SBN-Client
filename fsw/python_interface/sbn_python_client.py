@@ -149,16 +149,16 @@ class CFE_MSG_TelemetryHeader_t(BigEndianStructure):
                 ("Sec", CFE_MSG_TelemetrySecondaryHeader_t),
                 ("Spare", c_uint32)]
 
-class CFE_SB_Msg_t(Structure):
-    _pack_ = 1
-    _fields_ = [("Primary", Primary_Header_t),
-                ("Secondary", Secondary_Header_t)]
+# class CFE_SB_Msg_t(Structure):
+#     _pack_ = 1
+#     _fields_ = [("Primary", Primary_Header_t),
+#                 ("Secondary", Secondary_Header_t)]
 
 #for generic data type
 # TODO Should the max message size be hardcoded or somehow taken from the mps_defs directory?
 class sbn_data_generic_t(Structure):
     _pack_ = 1
-    _fields_ = [("TlmHeader", CFE_SB_Msg_t),
+    _fields_ = [("TlmHeader", CFE_MSG_TelemetryHeader_t),
                 ("byte_array", c_ubyte * 65536)]
 
 sbn_client = None
@@ -168,11 +168,11 @@ cmd_pipe_name = create_string_buffer(b'cmd_pipe')
 
 def print_header(message_p):
     recv_msg = message_p.contents
-    print("Message Header: {} {} {}".format(hex(recv_msg.TlmHeader.Primary.StreamId),
-                                            hex(recv_msg.TlmHeader.Primary.Sequence),
-                                            hex(recv_msg.TlmHeader.Primary.Length)))
-    print("Message Time: {} {}".format(hex(recv_msg.TlmHeader.Secondary.Seconds),
-                                       hex(recv_msg.TlmHeader.Secondary.Subseconds)))
+    print("Message Header: {} {} {}".format(hex(recv_msg.TlmHeader.Msg.CCSDS.Pri.StreamId),
+                                            hex(recv_msg.TlmHeader.Msg.CCSDS.Pri.Sequence),
+                                            hex(recv_msg.TlmHeader.MSG.CCSDS.Pri.Length)))
+    print("Message Time: {} {}".format(hex(recv_msg.TlmHeader.Sec.Seconds),
+                                       hex(recv_msg.TlmHeader.Sec.Subseconds)))
 
 # TODO: Common file?
 def cfs_error_convert (number):
