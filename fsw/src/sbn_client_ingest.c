@@ -33,6 +33,12 @@ void ingest_app_message(int SockFd, SBN_MsgSz_t MsgSz)
     CFE_MSG_Message_t* MsgPtr = (CFE_MSG_Message_t*) msg_buffer;
     
     status = CFE_SBN_CLIENT_ReadBytes(SockFd, msg_buffer, MsgSz);
+    printf("SBN_CLIENT: Ingest Msg with size %d, data = 0x", MsgSz);
+    for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+    {
+        printf("%02x",msg_buffer[i]);
+    }
+    printf("\n");
     
     if (status != CFE_SUCCESS)
     {
