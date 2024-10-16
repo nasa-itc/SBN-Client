@@ -58,6 +58,13 @@ void SendSubToSbn(int SubType, CFE_SB_MsgId_t MsgID,
 
     Pack_MsgID(&Pack, MsgID);
     Pack_Data(&Pack, &QoS, sizeof(QoS)); /* 2 uint8's */
+
+    printf("SBN_CLIENT SendSubtoSbn: SubType = %d, MsgSz = %d, Msg = 0x", SubType, Pack.BufUsed);
+    for(size_t i = 0; i < Pack.BufUsed; i++)
+    {
+        printf("%02x", (uint8_t*) Buf[i]);
+    }
+    printf("\n");
     
     size_t write_result = write_message(sbn_client_sockfd, Buf, Pack.BufUsed);
     
