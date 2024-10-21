@@ -48,7 +48,7 @@ void SendSubToSbn(int SubType, CFE_SB_MsgId_t MsgID,
     char Buf[SBN_PACKED_SUB_SZ] = {0};
     Pack_t Pack;
     Pack_Init(&Pack, Buf, SBN_PACKED_SUB_SZ, 0);
-    Pack_UInt16(&Pack, 54);
+    Pack_UInt16(&Pack, 67); //KB: Size?
     Pack_UInt8(&Pack, SubType);
     Pack_UInt32(&Pack, 2); // cpuID
     // Pack_UInt32(&Pack, 0x42); // spacecraft ID
@@ -59,10 +59,10 @@ void SendSubToSbn(int SubType, CFE_SB_MsgId_t MsgID,
     Pack_MsgID(&Pack, MsgID);
     Pack_Data(&Pack, &QoS, sizeof(QoS)); /* 2 uint8's */
 
-    printf("SBN_CLIENT SendSubtoSbn: SubType = %d, MsgSz = %d, Msg = 0x", SubType, Pack.BufUsed);
+    printf("SBN_CLIENT SendSubtoSbn: sockfd: %d SubType = %d, MsgID = %lu, MsgSz = %d, Msg = 0x", sbn_client_sockfd, SubType, MsgID.Value, Pack.BufUsed);
     for(size_t i = 0; i < Pack.BufUsed; i++)
     {
-        printf("%02x", (uint8_t*) Buf[i]);
+        printf("%c", /*(uint8_t*)*/ Buf[i]);
     }
     printf("\n");
     

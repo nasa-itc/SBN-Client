@@ -89,6 +89,16 @@ class sbn_data_generic_t(Structure):
     _pack_ = 1
     _fields_ = [("TlmHeader", CFE_SB_Msg_t),
                 ("byte_array", c_ubyte * 65536)]
+    
+
+# typedef struct
+# {
+#     CFE_SB_MsgId_Atom_t Value;
+# } CFE_SB_MsgId_t;
+
+class CFE_SB_MsgId_t(Structure):
+    _pack_ = 1
+    _fields_ = [("Value", c_uint32)]
 
 sbn_client = None
 cmd_pipe = c_uint32()
@@ -153,8 +163,11 @@ def recv_msg(recv_msg_p):
 def subscribe(msgid):
     global cmd_pipe
 
+    packed_msgid = CFE_SB_MsgId_t()
+    packed_msgid.Value = msgid
+
     print("SBN Client subscribe msgid: {}".format(msgid))
     print("SBN Client subscribe before_sub pipe: {}".format(cmd_pipe))
-    status = sbn_client.__wrap_CFE_SB_Subscribe(msgid, cmd_pipe)
+    status = sbn_client.__wrap_CFE_SB_Subscribe(packed_msgid, cmd_pipe)
     print("SBN Client subscribe after_sub pipe: {}".format(cmd_pipe))
     print("SBN Client subscribe msg (id {}): {}".format(hex(msgid), status))

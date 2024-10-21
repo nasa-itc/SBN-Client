@@ -138,6 +138,13 @@ size_t write_message(int sockfd, char *buffer, size_t size)
   size_t result;
   
   result = write(sockfd, buffer, size);
+
+  printf("sbn_client_utils: write_message: sockfd: %d, size: %lu, buffer: 0x", sockfd, size);
+  for(size_t i = 0; i < size; i++)
+  {
+      printf("%02x", (uint8_t*) buffer[i]);
+  }
+  printf("\n");
   
   return result;
 }
