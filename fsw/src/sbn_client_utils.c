@@ -230,6 +230,14 @@ int send_heartbeat(int sockfd)
     Pack_UInt32(&Pack, 2);
     // Pack_UInt32(&Pack, 0x42);
     Pack_UInt32(&Pack, 0x2A);
+
+    printf("Sending Client Heartbeat, Proc: %lu, SCID, %lu, Type: %d, MsgSz: %lu, Msg 0x", 2, 0x2A, SBN_HEARTBEAT_MSG, sizeof(sbn_header));
+    uint8_t * msg_char = (uint8_t*) Pack.Buf;
+    for(size_t i = 0; i < sizeof(sbn_header); i++)
+    {
+        printf("%02x", (uint8_t*) msg_char[i]);
+    }
+    printf("\n");
     
     retval = write(sockfd, sbn_header, sizeof(sbn_header));
     

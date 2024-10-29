@@ -16,7 +16,7 @@
 #include "sbn_client_minders.h"
 #include "sbn_client_utils.h"
 
-#define SECONDS_BETWEEN_HEARTBEATS   3
+#define SECONDS_BETWEEN_HEARTBEATS   5
 
 extern int sbn_client_sockfd;
 
@@ -26,16 +26,19 @@ bool continue_receive_check = true;
 
 void *SBN_Client_HeartbeatMinder(void *vargp)
 {
-    while(continue_heartbeat) /* TODO: check run state? */
+    if(SECONDS_BETWEEN_HEARTBEATS != 0)
     {
-        
-        if (sbn_client_sockfd != 0)
+        while(continue_heartbeat) /* TODO: check run state? */
         {
-            send_heartbeat(sbn_client_sockfd);
-        } /* end if */
-        
-        sleep(SECONDS_BETWEEN_HEARTBEATS);
-    } /* end while */
+            
+            if (sbn_client_sockfd != 0)
+            {
+                send_heartbeat(sbn_client_sockfd);
+            } /* end if */
+            
+            sleep(SECONDS_BETWEEN_HEARTBEATS);
+        } /* end while */
+    }
     
     return NULL;
 } /* end SBN_Client_HeartbeatMinder */
