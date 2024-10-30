@@ -139,12 +139,12 @@ size_t write_message(int sockfd, char *buffer, size_t size)
   
   result = write(sockfd, buffer, size);
 
-  printf("sbn_client_utils: write_message: sockfd: %d, size: %lu, buffer: 0x", sockfd, size);
-  for(size_t i = 0; i < size; i++)
-  {
-      printf("%02x", (uint8_t*) buffer[i]);
-  }
-  printf("\n");
+//   printf("sbn_client_utils: write_message: sockfd: %d, size: %lu, buffer: 0x", sockfd, size);
+//   for(size_t i = 0; i < size; i++)
+//   {
+//       printf("%02x", (uint8_t*) buffer[i]);
+//   }
+//   printf("\n");
   
   return result;
 }
@@ -231,13 +231,13 @@ int send_heartbeat(int sockfd)
     // Pack_UInt32(&Pack, 0x42);
     Pack_UInt32(&Pack, 0x2A);
 
-    printf("Sending Client Heartbeat, Proc: %lu, SCID, %lu, Type: %d, MsgSz: %lu, Msg 0x", 2, 0x2A, SBN_HEARTBEAT_MSG, sizeof(sbn_header));
-    uint8_t * msg_char = (uint8_t*) Pack.Buf;
-    for(size_t i = 0; i < sizeof(sbn_header); i++)
-    {
-        printf("%02x", (uint8_t*) msg_char[i]);
-    }
-    printf("\n");
+    // printf("Sending Client Heartbeat, Proc: %lu, SCID, %lu, Type: %d, MsgSz: %lu, Msg 0x", 2, 0x2A, SBN_HEARTBEAT_MSG, sizeof(sbn_header));
+    // uint8_t * msg_char = (uint8_t*) Pack.Buf;
+    // for(size_t i = 0; i < sizeof(sbn_header); i++)
+    // {
+    //     printf("%02x", (uint8_t*) msg_char[i]);
+    // }
+    // printf("\n");
     
     retval = write(sockfd, sbn_header, sizeof(sbn_header));
     
