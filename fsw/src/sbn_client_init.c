@@ -56,7 +56,7 @@ int32 SBN_Client_Init(void)
         for(i = 0; addr_list[i] != NULL; i++) 
         {
             //Return the first one;
-            strcpy(&Addr, inet_ntoa(*addr_list[i]) );
+            strcpy(Addr, inet_ntoa(*addr_list[i]) );
             break;
         }
     }
