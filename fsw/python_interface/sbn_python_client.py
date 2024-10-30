@@ -107,10 +107,10 @@ cmd_pipe_name = create_string_buffer(b'cmd_pipe')
 
 def print_header(message_p):
     recv_msg = message_p.contents
-    print("Message Header: {} {} {}".format(hex(recv_msg.TlmHeader.Primary.StreamId),
+    print("Message Header: StreamID: {} Sequence: {} Length: {}".format(hex(recv_msg.TlmHeader.Primary.StreamId),
                                             hex(recv_msg.TlmHeader.Primary.Sequence),
                                             hex(recv_msg.TlmHeader.Primary.Length)))
-    print("Message Time: {} {}".format(hex(recv_msg.TlmHeader.Secondary.Seconds),
+    print("Message Time: Seconds: {} Subseconds: {}".format(hex(recv_msg.TlmHeader.Secondary.Seconds),
                                        hex(recv_msg.TlmHeader.Secondary.Subseconds)))
 
 # TODO: Common file?
@@ -137,9 +137,6 @@ def sbn_load_and_init():
 def send_msg(send_msg_p):
     global sbn_client
 
-    # Adding debug print
-    send_msg = send_msg_p.contents
-    print("Message: {} {} {}".format(hex(send_msg.Hdr.StreamId), hex(send_msg.Hdr.Sequence), hex(send_msg.Hdr.Length)))
     print_header(send_msg_p)
 
     sbn_client.__wrap_CFE_SB_TransmitMsg(send_msg_p, true)
@@ -148,16 +145,14 @@ def recv_msg(recv_msg_p):
     global sbn_client
     global cmd_pipe
     
-    print("SBN Client recv_msg: recv_msg_p: {}".format(recv_msg_p))
-    print("SBN Client recv_msg: before read pipe: {}".format(cmd_pipe))
+    # print("SBN Client recv_msg: recv_msg_p: {}".format(recv_msg_p))
+    # print("SBN Client recv_msg: before read pipe: {}".format(cmd_pipe))
     status = sbn_client.__wrap_CFE_SB_ReceiveBuffer(byref(recv_msg_p), cmd_pipe, CFE_SB_PEND_FOREVER)
 
-    print("SBN Client recv_msg: after read pipe: {}".format(cmd_pipe))
+    # print("SBN Client recv_msg: after read pipe: {}".format(cmd_pipe))
     if (status != 0):
         print("status of __wrap_CFE_SB_ReceiveBuffer = %X" % cfs_error_convert(status))
-    # debug print
-    recv_msg = recv_msg_p.contents
-    print("Message: {} {} {}".format(hex(recv_msg.Hdr.StreamId), hex(recv_msg.Hdr.Sequence), hex(recv_msg.Hdr.Length)))
+
     print_header(recv_msg_p)
 
 def subscribe(msgid):
@@ -166,8 +161,8 @@ def subscribe(msgid):
     packed_msgid = CFE_SB_MsgId_t()
     packed_msgid.Value = msgid
 
-    print("SBN Client subscribe msgid: {}".format(msgid))
-    print("SBN Client subscribe before_sub pipe: {}".format(cmd_pipe))
+    # print("SBN Client subscribe msgid: {}".format(msgid))
+    # print("SBN Client subscribe before_sub pipe: {}".format(cmd_pipe))
     status = sbn_client.__wrap_CFE_SB_Subscribe(packed_msgid, cmd_pipe)
-    print("SBN Client subscribe after_sub pipe: {}".format(cmd_pipe))
+    # print("SBN Client subscribe after_sub pipe: {}".format(cmd_pipe))
     print("SBN Client subscribe msg (id {}): {}".format(hex(msgid), status))
