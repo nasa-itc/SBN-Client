@@ -29,9 +29,16 @@ void ingest_app_message(int SockFd, SBN_MsgSz_t MsgSz)
     int            status, i;
     bool           at_least_1_pipe_is_in_use = false;
     unsigned char  msg_buffer[CFE_SBN_CLIENT_MAX_MESSAGE_SIZE];
-    CFE_SB_MsgId_t MsgId;
+    CFE_SB_MsgId_t MsgId = CFE_SB_INVALID_MSG_ID;
+    CFE_MSG_Message_t* MsgPtr = (CFE_MSG_Message_t*) msg_buffer;
     
     status = CFE_SBN_CLIENT_ReadBytes(SockFd, msg_buffer, MsgSz);
+    // printf("SBN_CLIENT: Ingest Msg with size %d, data = 0x", MsgSz);
+    // for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+    // {
+    //     printf("%02x",msg_buffer[i]);
+    // }
+    // printf("\n");
     
     if (status != CFE_SUCCESS)
     {
@@ -44,8 +51,7 @@ void ingest_app_message(int SockFd, SBN_MsgSz_t MsgSz)
         return;
     }
 
-    // TODO: this will probably need to be fixed... I think GetMsgId needs a pointer to MsgId now
-    MsgId = CFE_SBN_Client_GetMsgId((CFE_MSG_Message_t *)msg_buffer);
+    CFE_MSG_GetMsgId(MsgPtr, &MsgId);
     
     pthread_mutex_lock(&receive_mutex);
     
@@ -60,7 +66,7 @@ void ingest_app_message(int SockFd, SBN_MsgSz_t MsgSz)
             
             for(j = 0; j < CFE_SBN_CLIENT_MAX_MSG_IDS_PER_PIPE; j++)
             {
-                if (PipeTbl[i].SubscribedMsgIds[j] == MsgId)
+                if (CFE_SB_MsgIdToValue(PipeTbl[i].SubscribedMsgIds[j]) == CFE_SB_MsgIdToValue(MsgId))
                 {
                     if (PipeTbl[i].NumberOfMessages == CFE_PLATFORM_SBN_CLIENT_MAX_PIPE_DEPTH)
                     {

@@ -89,18 +89,28 @@ class sbn_data_generic_t(Structure):
     _pack_ = 1
     _fields_ = [("TlmHeader", CFE_SB_Msg_t),
                 ("byte_array", c_ubyte * 65536)]
+    
+
+# typedef struct
+# {
+#     CFE_SB_MsgId_Atom_t Value;
+# } CFE_SB_MsgId_t;
+
+class CFE_SB_MsgId_t(Structure):
+    _pack_ = 1
+    _fields_ = [("Value", c_uint32)]
 
 sbn_client = None
-cmd_pipe = c_uint()
+cmd_pipe = c_uint32()
 cmd_pipe_name = create_string_buffer(b'cmd_pipe')
 
 
 def print_header(message_p):
     recv_msg = message_p.contents
-    print("Message Header: {} {} {}".format(hex(recv_msg.TlmHeader.Primary.StreamId),
+    print("Message Header: StreamID: {} Sequence: {} Length: {}".format(hex(recv_msg.TlmHeader.Primary.StreamId),
                                             hex(recv_msg.TlmHeader.Primary.Sequence),
                                             hex(recv_msg.TlmHeader.Primary.Length)))
-    print("Message Time: {} {}".format(hex(recv_msg.TlmHeader.Secondary.Seconds),
+    print("Message Time: Seconds: {} Subseconds: {}".format(hex(recv_msg.TlmHeader.Secondary.Seconds),
                                        hex(recv_msg.TlmHeader.Secondary.Subseconds)))
 
 # TODO: Common file?
@@ -122,24 +132,37 @@ def sbn_load_and_init():
     print("SBN Client init: {}".format(status))
     status = sbn_client.__wrap_CFE_SB_CreatePipe(byref(cmd_pipe), 10, cmd_pipe_name)
     print("SBN Client command pipe: {}".format(status))
+    print("SBN Client sbn_load_and_init pipe: {}".format(cmd_pipe))
 
 def send_msg(send_msg_p):
     global sbn_client
+
+    print_header(send_msg_p)
 
     sbn_client.__wrap_CFE_SB_TransmitMsg(send_msg_p, true)
 
 def recv_msg(recv_msg_p):
     global sbn_client
     global cmd_pipe
+    
+    # print("SBN Client recv_msg: recv_msg_p: {}".format(recv_msg_p))
+    # print("SBN Client recv_msg: before read pipe: {}".format(cmd_pipe))
     status = sbn_client.__wrap_CFE_SB_ReceiveBuffer(byref(recv_msg_p), cmd_pipe, CFE_SB_PEND_FOREVER)
+
+    # print("SBN Client recv_msg: after read pipe: {}".format(cmd_pipe))
     if (status != 0):
         print("status of __wrap_CFE_SB_ReceiveBuffer = %X" % cfs_error_convert(status))
-    #recv_msg = recv_msg_p.contents
-    #print("Message: {} {} {}".format(hex(recv_msg.Hdr.StreamId), hex(recv_msg.Hdr.Sequence), hex(recv_msg.Hdr.Length)))
-    #print_header(recv_msg_p)
+
+    print_header(recv_msg_p)
 
 def subscribe(msgid):
     global cmd_pipe
 
-    status = sbn_client.__wrap_CFE_SB_Subscribe(msgid, cmd_pipe)
+    packed_msgid = CFE_SB_MsgId_t()
+    packed_msgid.Value = msgid
+
+    # print("SBN Client subscribe msgid: {}".format(msgid))
+    # print("SBN Client subscribe before_sub pipe: {}".format(cmd_pipe))
+    status = sbn_client.__wrap_CFE_SB_Subscribe(packed_msgid, cmd_pipe)
+    # print("SBN Client subscribe after_sub pipe: {}".format(cmd_pipe))
     print("SBN Client subscribe msg (id {}): {}".format(hex(msgid), status))
