@@ -48,15 +48,24 @@ void SendSubToSbn(int SubType, CFE_SB_MsgId_t MsgID,
     char Buf[SBN_PACKED_SUB_SZ] = {0};
     Pack_t Pack;
     Pack_Init(&Pack, Buf, SBN_PACKED_SUB_SZ, 0);
-    Pack_UInt16(&Pack, 54);
+    Pack_Int16(&Pack, 67); //KB: Size?
     Pack_UInt8(&Pack, SubType);
     Pack_UInt32(&Pack, 2); // cpuID
-    Pack_UInt32(&Pack, 0x42); // spacecraft ID
+    // Pack_UInt32(&Pack, 0x42); // spacecraft ID
+    Pack_UInt32(&Pack, 0x2A); // spacecraft ID
     Pack_Data(&Pack, (void *)SBN_IDENT, (size_t)SBN_IDENT_LEN);
     Pack_UInt16(&Pack, 1);
 
     Pack_MsgID(&Pack, MsgID);
+    // Pack_UInt32(&Pack, 0x08FA);
     Pack_Data(&Pack, &QoS, sizeof(QoS)); /* 2 uint8's */
+
+    // printf("SBN_CLIENT SendSubtoSbn: sockfd: %d SubType = %d, MsgID = %lu, MsgSz = %d, Msg = 0x", sbn_client_sockfd, SubType, MsgID.Value, Pack.BufUsed);
+    // for(size_t i = 0; i < Pack.BufUsed; i++)
+    // {
+    //     printf("%c", /*(uint8_t*)*/ Buf[i]);
+    // }
+    // printf("\n");
     
     size_t write_result = write_message(sbn_client_sockfd, Buf, Pack.BufUsed);
     
@@ -94,18 +103,58 @@ int32 recv_msg(int32 sockfd)
         Unpack_UInt32(&Pack, &CpuID);
         Unpack_UInt32(&Pack, &SpacecraftID);
 
-        //TODO: check cpuID and SpacecraftID to see if it is correct for this location?
+        //TODO: check cpuID and SpacecraftID to see if it is correct for this location? And check that it isn't the heartbeat
+        // if(MsgType != 0xA0)
+        // {
+        //     printf("SBN_CLIENT: recv_msg with MsgType = %d, CpuID = 0x%04x, SCID = 0x%04x, MsgSz = %d, Msg = 0x", MsgType, CpuID, SpacecraftID, MsgSz);
+        //     for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+        //     {
+        //         printf("%02x",msg[i]);
+        //     }
+        //     printf("\n");
+        // }
+
 
         switch(MsgType)
         {
             case SBN_NO_MSG:
                 status = CFE_SBN_CLIENT_ReadBytes(sockfd, msg, MsgSz);
+                // printf("SBN_CLIENT: recv_msg with MsgType = %d, CpuID = 0x%04x, SCID = 0x%04x, MsgSz = %d, Msg = 0x", MsgType, CpuID, SpacecraftID, MsgSz);
+                // for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+                // {
+                //     printf("%02x",msg[i]);
+                //     // if(msg[i] != "\0")
+                //     // {
+                //     //     printf("%c", msg[i]);
+                //     // }
+                // }
+                // printf("\n");
                 break;
             case SBN_SUB_MSG:
                 status = CFE_SBN_CLIENT_ReadBytes(sockfd, msg, MsgSz);
+                // printf("SBN_CLIENT: recv_msg with MsgType = %d, CpuID = 0x%04x, SCID = 0x%04x, MsgSz = %d, Msg = 0x", MsgType, CpuID, SpacecraftID, MsgSz);
+                // for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+                // {
+                //     printf("%02x",msg[i]);
+                //     // if(msg[i] != "\0")
+                //     // {
+                //         // printf("%c", msg[i]);
+                //     // }
+                // }
+                // printf("\n");
                 break;
             case SBN_UNSUB_MSG:
                 status = CFE_SBN_CLIENT_ReadBytes(sockfd, msg, MsgSz);
+                // printf("SBN_CLIENT: recv_msg with MsgType = %d, CpuID = 0x%04x, SCID = 0x%04x, MsgSz = %d, Msg = 0x", MsgType, CpuID, SpacecraftID, MsgSz);
+                // for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+                // {
+                //     printf("%02x",msg[i]);
+                //     // if(msg[i] != "\0")
+                //     // {
+                //     //     printf("%c", msg[i]);
+                //     // }
+                // }
+                // printf("\n");
                 break;
             case SBN_APP_MSG:
                 ingest_app_message(sockfd, MsgSz);
@@ -113,6 +162,16 @@ int32 recv_msg(int32 sockfd)
                 break;
             case SBN_PROTO_MSG:      
                 status = CFE_SBN_CLIENT_ReadBytes(sockfd, msg, MsgSz);
+                // printf("SBN_CLIENT: recv_msg with MsgType = %d, CpuID = 0x%04x, SCID = 0x%04x, MsgSz = %d, Msg = 0x", MsgType, CpuID, SpacecraftID, MsgSz);
+                // for(SBN_MsgSz_t i = 0; i < MsgSz; i++)
+                // {
+                //     printf("%02x",msg[i]);
+                //     // if(msg[i] != "\0")
+                //     // {
+                //     //     printf("%c", msg[i]);
+                //     // }
+                // }
+                // printf("\n");
                 break;
             case SBN_HEARTBEAT_MSG:
                 status = CFE_SBN_CLIENT_ReadBytes(sockfd, msg, MsgSz);
